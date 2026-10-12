@@ -90,7 +90,7 @@ body{padding:0;overflow:hidden}
     <div class="settings-subhead"><button type="button" class="screen-back" data-settings-back>‹ Ajustes</button><strong>Mis categorías</strong><span class="small" id="categoryCount"></span></div>
     <div class="category-tools compact-tools"><input id="newCategory" maxlength="32" placeholder="Nueva categoría" aria-label="Nombre de categoría nueva"><button id="addCategoryBtn">Agregar</button></div>
     <div class="managed-list" id="managedCategories"></div>
-    <div class="movement-pager category-pager"><button type="button" id="categoryPrev">‹ Anteriores</button><span id="categoryPageLabel">1 / 1</span><button type="button" id="categoryNext">Siguientes ›</button></div>
+    <div class="movement-pager category-pager"><button type="button" id="categoryPrev">‹ Anteriores</button><span id="categoryPageLabel">1 / 1</span><button type="button" id="categoryPageNext">Siguientes ›</button></div>
   </div>
   <div class="settings-view" id="dataSettings" hidden>
     <div class="settings-subhead"><button type="button" class="screen-back" data-settings-back>‹ Ajustes</button><strong>Copias de seguridad</strong></div>
@@ -176,7 +176,8 @@ function createMockTransactions(){
  ];
  return rows.map((r,i)=>({id:'demo-'+String(i+1).padStart(3,'0'),date:r[0],type:r[1],amount:r[2],category:r[3],description:r[4],createdAt:new Date(r[0]+'T12:00:00').getTime()+i,demo:true}));
 }
-let txs=loadTx(), categories=loadCategories(), viewDate=new Date(), selectedType='expense', editingId=null, selectedTrendCategory='';
+let txs=loadTx(), categories=loadCategories(), viewDate=new Date(), selectedType='expense', editingId=null, selectedTrendCategory='', movementPage=0, categoryPage=0, wizardStep=1;
+const MOVEMENTS_PER_PAGE=4, CATEGORIES_PER_PAGE=5;
 // One-time migration: add the three newly requested categories to existing local setups.
 if(localStorage.getItem(EXTRA_CATEGORIES_KEY)!=='done'){
  for(const name of ['PedidosYa','Comida','Super']) if(!categories.some(c=>c.toLocaleLowerCase('es')===name.toLocaleLowerCase('es'))) categories.push(name);
@@ -222,7 +223,10 @@ function render(){
  let filtered=m.filter(t=>$('typeFilter').value==='all'||t.type===$('typeFilter').value).filter(t=>$('categoryFilter').value==='all'||t.category===$('categoryFilter').value).sort((a,b)=>(b.date||'').localeCompare(a.date||'')||(b.createdAt||0)-(a.createdAt||0));
  $('txCount').textContent=filtered.length+' '+(filtered.length===1?'movimiento':'movimientos');
  $('demoNotice').hidden=!txs.some(t=>t.demo);
- $('transactions').innerHTML=filtered.length?filtered.map(t=>`<article class="transaction"><div class="emoji">${emojiFor(t)}</div><div class="tx-info"><div class="tx-title">${esc(t.description||t.category)}</div><div class="tx-meta">${esc(t.category)} · ${fmtDate(t.date)}</div></div><div class="tx-right"><div class="tx-amount ${t.type==='income'?'plus':'minus'}">${t.type==='income'?'+':'−'}${money(Number(t.amount))}</div><div class="tx-actions"><button data-edit="${esc(t.id)}">Editar</button><button data-delete="${esc(t.id)}">Borrar</button></div></div></article>`).join(''):'<div class="empty"><div class="symbol">＋</div><strong>Sin movimientos todavía</strong><div style="font-size:13px;margin-top:5px">Registrá tu primer gasto o ingreso.</div></div>';
+ const movementPages=Math.max(1,Math.ceil(filtered.length/MOVEMENTS_PER_PAGE));movementPage=Math.min(movementPage,movementPages-1);
+ const visible=filtered.slice(movementPage*MOVEMENTS_PER_PAGE,(movementPage+1)*MOVEMENTS_PER_PAGE);
+ $('transactions').innerHTML=visible.length?visible.map(t=>`<article class="transaction"><div class="emoji">${emojiFor(t)}</div><div class="tx-info"><div class="tx-title">${esc(t.description||t.category)}</div><div class="tx-meta">${esc(t.category)} · ${fmtDate(t.date)}</div></div><div class="tx-right"><div class="tx-amount ${t.type==='income'?'plus':'minus'}">${t.type==='income'?'+':'−'}${money(Number(t.amount))}</div><div class="tx-actions"><button type="button" data-edit="${esc(t.id)}">Editar</button><button type="button" data-delete="${esc(t.id)}">Borrar</button></div></div></article>`).join(''):'<div class="empty"><div class="symbol">＋</div><strong>Sin movimientos todavía</strong><div style="font-size:13px;margin-top:5px">Registrá tu primer gasto o ingreso.</div></div>';
+ $('movementPageLabel').textContent=(movementPage+1)+' / '+movementPages;$('movementPrev').disabled=movementPage===0;$('movementNext').disabled=movementPage>=movementPages-1;$('movementPager').hidden=filtered.length<=MOVEMENTS_PER_PAGE;
  renderAnalytics();renderManagedCategories();persist();
 }
 function monthSeries(count=12){const out=[];for(let i=count-1;i>=0;i--){const d=new Date(viewDate.getFullYear(),viewDate.getMonth()-i,1),key=monthKey(d),rows=txs.filter(t=>(t.date||'').slice(0,7)===key),s=totals(rows);out.push({d,key,label:monthAbbr(d),fullLabel:monthName(d),...s})}return out}
@@ -232,6 +236,7 @@ function renderAnalytics(){
  if(!available.includes(selectedTrendCategory))selectedTrendCategory=available[0]||'';
  $('trendCategoryButtons').innerHTML=available.map(c=>`<button type="button" class="category-choice ${selectedTrendCategory===c?'selected':''}" data-trend-category="${esc(c)}" aria-pressed="${selectedTrendCategory===c?'true':'false'}"><span class="choice-icon">${ICONS[c]||'📦'}</span><span class="choice-name">${esc(c)}</span></button>`).join('');
  renderTrend(selectedTrendCategory);
+ $('selectedTrendTitle').textContent=selectedTrendCategory;
 }
 function renderTrend(category){
  const data=monthSeries(3).map(m=>({...m,amount:txs.filter(t=>t.type==='expense'&&t.category===category&&(t.date||'').slice(0,7)===m.key).reduce((sum,t)=>sum+Number(t.amount),0)}));
@@ -262,39 +267,134 @@ function renderTrend(category){
 function compactMoney(n){return '$'+Math.round(n).toLocaleString('es-AR')}
 function renderManagedCategories(){
  $('categoryCount').textContent=categories.length+' categorías';
- $('managedCategories').innerHTML=categories.length?categories.map(c=>`<div class="managed-category"><div class="emoji" style="width:37px;height:37px;font-size:18px">${ICONS[c]||'📦'}</div><div class="name">${esc(c)}</div><button class="mini-btn" data-rename="${esc(c)}">Renombrar</button><button class="mini-btn danger" data-remove="${esc(c)}" aria-label="Eliminar ${esc(c)}">×</button></div>`).join(''):'<div class="empty">Todavía no creaste categorías.</div>';
+ const pages=Math.max(1,Math.ceil(categories.length/CATEGORIES_PER_PAGE));categoryPage=Math.min(categoryPage,pages-1);const visible=categories.slice(categoryPage*CATEGORIES_PER_PAGE,(categoryPage+1)*CATEGORIES_PER_PAGE);
+ $('managedCategories').innerHTML=visible.length?visible.map(c=>`<div class="managed-category"><div class="emoji" style="width:37px;height:37px;font-size:18px">${ICONS[c]||'📦'}</div><div class="name">${esc(c)}</div><button type="button" class="mini-btn" data-rename="${esc(c)}">Renombrar</button><button type="button" class="mini-btn danger" data-remove="${esc(c)}" aria-label="Eliminar ${esc(c)}">×</button></div>`).join(''):'<div class="empty">Todavía no creaste categorías.</div>';
+ $('categoryPageLabel').textContent=(categoryPage+1)+' / '+pages;$('categoryPrev').disabled=categoryPage===0;$('categoryPageNext').disabled=categoryPage>=pages-1;$('categoryPrev').parentElement.hidden=categories.length<=CATEGORIES_PER_PAGE;
+}
+function showWizardStep(step){
+ wizardStep=step;
+ document.querySelectorAll('.wizard-step').forEach((el,i)=>{const active=(i+1)===step;el.classList.toggle('active',active);el.hidden=!active});
+ $('stepLabel').textContent='PASO '+step+' DE 3';
+ if(step===3) updateReviewSummary();
+}
+function updateReviewSummary(){
+ const amount=Number($('amount').value)||0;
+ const cat=selectedType==='income'?'Sueldo':($('category').value||'Sin categoría');
+ $('reviewTitle').textContent=selectedType==='income'?'Confirmá tu sueldo':'Confirmá el gasto';
+ $('reviewSummary').innerHTML=`<div class="review-amount">${money(amount)}</div><div class="review-category">${selectedType==='income'?'💼':(ICONS[cat]||'📦')} ${esc(cat)}</div>`;
 }
 function openForm(type='expense',tx=null){
- selectedType=tx?.type||type;editingId=tx?.id||null;$('formTitle').textContent=tx?'Editar movimiento':'Nuevo movimiento';$('amount').value=tx?.amount??'';$('description').value=tx?.description??'';$('date').value=tx?.date||dateISO();
- document.querySelectorAll('.type-btn').forEach(b=>b.classList.toggle('selected',b.dataset.type===selectedType));updateTypeFields(tx?.category);$('saveBtn').textContent=tx?'Guardar cambios':'Guardar movimiento';$('overlay').classList.add('open');setTimeout(()=>$('amount').focus(),100)
+ selectedType=tx?.type||type;editingId=tx?.id||null;
+ $('formTitle').textContent=tx?'Editar movimiento':'Nuevo movimiento';
+ $('amount').value=tx?.amount??'';$('description').value=tx?.description??'';$('date').value=tx?.date||dateISO();
+ $('category').value=tx?.category||'';
+ document.querySelectorAll('.type-btn').forEach(b=>b.classList.toggle('selected',b.dataset.type===selectedType));
+ fillCategories(tx?.category);showWizardStep(1);
+ $('saveBtn').textContent=tx?'Guardar cambios':'Guardar';
+ $('overlay').classList.add('open');
+ setTimeout(()=>$('amount').focus(),100);
 }
-function updateTypeFields(preferred){const isIncome=selectedType==='income';$('expenseCategoryField').hidden=isIncome;$('incomeCategoryField').hidden=!isIncome;if(!isIncome)fillCategories(preferred)}
-function closeForm(){$('overlay').classList.remove('open');editingId=null;$('txForm').reset();selectedType='expense';document.querySelectorAll('.type-btn').forEach(b=>b.classList.toggle('selected',b.dataset.type==='expense'));updateTypeFields()}
-function save(e){e.preventDefault();const amount=Number($('amount').value);if(!Number.isFinite(amount)||amount<=0){alert('Ingresá un importe mayor que cero.');return}if(selectedType==='expense'&&!categories.includes($('category').value)){alert('Primero tocá el botón de la categoría del gasto.');return}
- const old=editingId?txs.find(t=>t.id===editingId):null;const tx={id:editingId||('t'+Date.now().toString(36)+Math.random().toString(36).slice(2,7)),type:selectedType,amount,category:selectedType==='income'?'Sueldo':$('category').value,description:$('description').value.trim(),date:$('date').value||dateISO(),createdAt:old?.createdAt||Date.now(),demo:false};
- if(editingId)txs=txs.map(t=>t.id===editingId?tx:t);else txs.push(tx);persist();viewDate=parseDate(tx.date);closeForm();render()}
+function updateTypeFields(preferred){if(selectedType==='expense')fillCategories(preferred);}
+function closeForm(){
+ $('overlay').classList.remove('open');editingId=null;$('txForm').reset();$('category').value='';selectedType='expense';
+ document.querySelectorAll('.type-btn').forEach(b=>b.classList.toggle('selected',b.dataset.type==='expense'));
+ fillCategories();showWizardStep(1);
+}
+function save(e){
+ e.preventDefault();const amount=Number($('amount').value);
+ if(!Number.isFinite(amount)||amount<=0){showWizardStep(1);alert('Ingresá un importe mayor que cero.');return}
+ if(selectedType==='expense'&&!categories.includes($('category').value)){showWizardStep(2);alert('Elegí una categoría para el gasto.');return}
+ const old=editingId?txs.find(t=>t.id===editingId):null;
+ const tx={id:editingId||('t'+Date.now().toString(36)+Math.random().toString(36).slice(2,7)),type:selectedType,amount,category:selectedType==='income'?'Sueldo':$('category').value,description:$('description').value.trim(),date:$('date').value||dateISO(),createdAt:old?.createdAt||Date.now(),demo:false};
+ if(editingId)txs=txs.map(t=>t.id===editingId?tx:t);else txs.push(tx);
+ persist();viewDate=parseDate(tx.date);movementPage=0;closeForm();render();
+}
 function exportCSV(){const rows=[['Fecha','Tipo','Importe ARS','Categoría','Descripción'],...txs.slice().sort((a,b)=>(a.date||'').localeCompare(b.date||'')).map(t=>[t.date,t.type==='income'?'Ingreso':'Gasto',t.amount,t.category,t.description||''])];const csv=rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(';')).join('\r\n');download('\ufeff'+csv,'gastos_'+dateISO()+'.csv','text/csv;charset=utf-8')}
 function download(content,name,type){const blob=new Blob([content],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)}
 function backup(){download(JSON.stringify({format:'mis-gastos-v2',exportedAt:new Date().toISOString(),categories,transactions:txs},null,2),'copia_gastos_'+dateISO()+'.json','application/json')}
-function addCategory(){const input=$('newCategory'),name=input.value.trim().replace(/\s+/g,' ');if(!name){input.focus();return}if(name.toLocaleLowerCase('es')==='sueldo'){alert('“Sueldo” está reservado para el ingreso. Elegí otro nombre para una categoría de gastos.');return}if(categories.some(c=>c.toLocaleLowerCase('es')===name.toLocaleLowerCase('es'))){alert('Ya existe una categoría con ese nombre.');return}categories.push(name);categories.sort((a,b)=>a.localeCompare(b,'es'));input.value='';persist();render();fillCategories(name)}
+function addCategory(){const input=$('newCategory'),name=input.value.trim().replace(/\s+/g,' ');if(!name){input.focus();return}if(name.toLocaleLowerCase('es')==='sueldo'){alert('“Sueldo” está reservado para el ingreso. Elegí otro nombre para una categoría de gastos.');return}if(categories.some(c=>c.toLocaleLowerCase('es')===name.toLocaleLowerCase('es'))){alert('Ya existe una categoría con ese nombre.');return}categories.push(name);categories.sort((a,b)=>a.localeCompare(b,'es'));categoryPage=0;input.value='';persist();render();fillCategories(name)}
 function renameCategory(oldName){const entered=prompt('Nuevo nombre para “'+oldName+'”:',oldName);if(entered===null)return;const name=entered.trim().replace(/\s+/g,' ');if(!name){alert('El nombre no puede estar vacío.');return}if(name.toLocaleLowerCase('es')==='sueldo'){alert('“Sueldo” está reservado para los ingresos.');return}if(categories.some(c=>c!==oldName&&c.toLocaleLowerCase('es')===name.toLocaleLowerCase('es'))){alert('Ya existe una categoría con ese nombre.');return}categories=categories.map(c=>c===oldName?name:c);txs=txs.map(t=>t.type==='expense'&&t.category===oldName?{...t,category:name}:t);persist();render()}
 function removeCategory(name){const used=txs.some(t=>t.type==='expense'&&t.category===name);const msg=used?'Eliminar “'+name+'” de las categorías disponibles? Los movimientos existentes conservarán ese nombre en el historial.':'¿Eliminar la categoría “'+name+'”?';if(!confirm(msg))return;categories=categories.filter(c=>c!==name);persist();render()}
-// Older versions allowed several income types and payment methods. Normalize income to the single category requested.
+// Normalize legacy records to the current data model.
 txs=txs.map(cleanTransaction);
 ensureNewDemoRows();
-$('addBtn').addEventListener('click',()=>openForm());$('closeForm').addEventListener('click',closeForm);$('cancelForm').addEventListener('click',closeForm);$('overlay').addEventListener('click',e=>{if(e.target===$('overlay'))closeForm()});$('txForm').addEventListener('submit',save);
-document.querySelectorAll('.type-btn').forEach(b=>b.addEventListener('click',()=>{selectedType=b.dataset.type;document.querySelectorAll('.type-btn').forEach(x=>x.classList.toggle('selected',x===b));updateTypeFields()}));
-$('prevMonth').addEventListener('click',()=>{viewDate=new Date(viewDate.getFullYear(),viewDate.getMonth()-1,1);render()});$('nextMonth').addEventListener('click',()=>{viewDate=new Date(viewDate.getFullYear(),viewDate.getMonth()+1,1);render()});$('todayBtn').addEventListener('click',()=>{viewDate=new Date();render()});
-$('typeFilter').addEventListener('change',render);$('categoryFilter').addEventListener('change',render);
-$('categoryButtons').addEventListener('click',e=>{const b=e.target.closest('[data-category-choice]');if(!b)return;$('category').value=b.dataset.categoryChoice;document.querySelectorAll('#categoryButtons [data-category-choice]').forEach(x=>{const active=x===b;x.classList.toggle('selected',active);x.setAttribute('aria-pressed',active?'true':'false')})});
-$('trendCategoryButtons').addEventListener('click',e=>{const b=e.target.closest('[data-trend-category]');if(!b)return;selectedTrendCategory=b.dataset.trendCategory;renderAnalytics()});
-$('transactions').addEventListener('click',e=>{const edit=e.target.closest('[data-edit]'),del=e.target.closest('[data-delete]');if(edit){const t=txs.find(x=>x.id===edit.dataset.edit);if(t)openForm(t.type,t)}if(del){const t=txs.find(x=>x.id===del.dataset.delete);if(t&&confirm(`¿Borrar “${t.description||t.category}” por ${money(t.amount)}?`)){txs=txs.filter(x=>x.id!==t.id);persist();render()}}});
-document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.page').forEach(x=>x.classList.toggle('active',x.id===b.dataset.page+'Page'))}));
-$('exportCSVBtn').addEventListener('click',exportCSV);$('backupBtn').addEventListener('click',backup);$('removeDemoBtn').addEventListener('click',()=>{const count=txs.filter(t=>t.demo).length;if(count&&confirm('¿Eliminar los '+count+' movimientos de prueba? Tus movimientos personales se conservarán.')){txs=txs.filter(t=>!t.demo);if(txs.length===0)viewDate=new Date();persist();render()}});$('addCategoryBtn').addEventListener('click',addCategory);$('newCategory').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();addCategory()}});
+
+// Main controls.
+$('addBtn').addEventListener('click',()=>openForm());
+$('closeForm').addEventListener('click',closeForm);
+$('overlay').addEventListener('click',e=>{if(e.target===$('overlay'))closeForm()});
+$('txForm').addEventListener('submit',save);
+document.querySelectorAll('.type-btn').forEach(b=>b.addEventListener('click',()=>{
+ selectedType=b.dataset.type;
+ document.querySelectorAll('.type-btn').forEach(x=>x.classList.toggle('selected',x===b));
+ if(selectedType==='income')$('category').value='';
+}));
+$('amountNext').addEventListener('click',()=>{
+ const amount=Number($('amount').value);
+ if(!Number.isFinite(amount)||amount<=0){alert('Ingresá un importe mayor que cero.');$('amount').focus();return}
+ if(selectedType==='expense'){fillCategories($('category').value);showWizardStep(2)}else{showWizardStep(3)}
+});
+$('categoryBack').addEventListener('click',()=>showWizardStep(1));
+$('categoryNext').addEventListener('click',()=>{
+ if(!categories.includes($('category').value)){alert('Tocá el botón de una categoría para continuar.');return}
+ showWizardStep(3);
+});
+$('detailsBack').addEventListener('click',()=>showWizardStep(selectedType==='expense'?2:1));
+$('prevMonth').addEventListener('click',()=>{viewDate=new Date(viewDate.getFullYear(),viewDate.getMonth()-1,1);movementPage=0;render()});
+$('nextMonth').addEventListener('click',()=>{viewDate=new Date(viewDate.getFullYear(),viewDate.getMonth()+1,1);movementPage=0;render()});
+$('todayBtn').addEventListener('click',()=>{viewDate=new Date();movementPage=0;render()});
+$('typeFilter').addEventListener('change',()=>{movementPage=0;render()});
+$('categoryFilter').addEventListener('change',()=>{movementPage=0;render()});
+$('movementPrev').addEventListener('click',()=>{movementPage=Math.max(0,movementPage-1);render()});
+$('movementNext').addEventListener('click',()=>{movementPage++;render()});
+$('categoryButtons').addEventListener('click',e=>{
+ const b=e.target.closest('[data-category-choice]');if(!b)return;
+ $('category').value=b.dataset.categoryChoice;
+ document.querySelectorAll('#categoryButtons [data-category-choice]').forEach(x=>{const active=x===b;x.classList.toggle('selected',active);x.setAttribute('aria-pressed',active?'true':'false')});
+});
+$('transactions').addEventListener('click',e=>{
+ const edit=e.target.closest('[data-edit]'),del=e.target.closest('[data-delete]');
+ if(edit){const t=txs.find(x=>x.id===edit.dataset.edit);if(t)openForm(t.type,t)}
+ if(del){const t=txs.find(x=>x.id===del.dataset.delete);if(t&&confirm(`¿Borrar “${t.description||t.category}” por ${money(t.amount)}?`)){txs=txs.filter(x=>x.id!==t.id);render()}}
+});
+// Top-level navigation.
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{
+ document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===b));
+ document.querySelectorAll('.page').forEach(x=>x.classList.toggle('active',x.id===b.dataset.page+'Page'));
+}));
+// Category-by-category trend navigation.
+$('trendCategoryButtons').addEventListener('click',e=>{
+ const b=e.target.closest('[data-trend-category]');if(!b)return;
+ selectedTrendCategory=b.dataset.trendCategory;$('trendPickerPane').hidden=true;$('trendChartPane').hidden=false;renderAnalytics();
+});
+$('changeTrendCategory').addEventListener('click',()=>{$('trendChartPane').hidden=true;$('trendPickerPane').hidden=false});
+// Settings sub-screens.
+function showSettingsView(id){document.querySelectorAll('.settings-view').forEach(v=>{const active=v.id===id;v.classList.toggle('active',active);v.hidden=!active})}
+$('categoriesScreenBtn').addEventListener('click',()=>showSettingsView('categoriesSettings'));
+$('dataScreenBtn').addEventListener('click',()=>showSettingsView('dataSettings'));
+document.querySelectorAll('[data-settings-back]').forEach(b=>b.addEventListener('click',()=>showSettingsView('settingsMenu')));
+$('categoryPrev').addEventListener('click',()=>{categoryPage=Math.max(0,categoryPage-1);renderManagedCategories()});
+$('categoryPageNext').addEventListener('click',()=>{categoryPage++;renderManagedCategories()});
+// Backups, categories and demo data.
+$('exportCSVBtn').addEventListener('click',exportCSV);
+$('backupBtn').addEventListener('click',backup);
+$('removeDemoBtn').addEventListener('click',()=>{const count=txs.filter(t=>t.demo).length;if(count&&confirm('¿Eliminar los '+count+' movimientos de prueba? Tus movimientos personales se conservarán.')){txs=txs.filter(t=>!t.demo);if(txs.length===0)viewDate=new Date();movementPage=0;persist();render()}});
+$('addCategoryBtn').addEventListener('click',addCategory);
+$('newCategory').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();addCategory()}});
 $('managedCategories').addEventListener('click',e=>{const rename=e.target.closest('[data-rename]'),remove=e.target.closest('[data-remove]');if(rename)renameCategory(rename.dataset.rename);if(remove)removeCategory(remove.dataset.remove)});
-$('restoreFile').addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;try{const data=JSON.parse(await f.text()),arr=Array.isArray(data)?data:data.transactions;if(!Array.isArray(arr))throw new Error('Formato inválido');if(!confirm(`Se reemplazarán los ${txs.length} movimientos actuales por ${arr.length} registros. ¿Continuar?`))return;txs=arr.filter(t=>t&&Number(t.amount)>0&&['income','expense'].includes(t.type)).map(cleanTransaction);if(data&&Array.isArray(data.categories)){const names=[...new Set(data.categories.map(x=>String(x).trim()).filter(Boolean))];if(names.length)categories=names.filter(n=>n.toLocaleLowerCase('es')!=='sueldo')}persist();render();alert('Copia restaurada.')}catch(err){alert('No se pudo restaurar: el archivo no parece una copia válida.')}finally{e.target.value=''}});
-$('clearBtn').addEventListener('click',()=>{if(confirm('¿Borrar TODOS los movimientos guardados en este dispositivo? Esta acción no se puede deshacer.')&&confirm('Confirmación final: ¿borrar todos los registros?')){txs=[];persist();render()}});
-updateTypeFields();$('date').value=dateISO();persist();render();
+$('restoreFile').addEventListener('change',async e=>{
+ const f=e.target.files[0];if(!f)return;
+ try{const data=JSON.parse(await f.text()),arr=Array.isArray(data)?data:data.transactions;if(!Array.isArray(arr))throw new Error('Formato inválido');
+  if(!confirm(`Se reemplazarán los ${txs.length} movimientos actuales por ${arr.length} registros. ¿Continuar?`))return;
+  txs=arr.filter(t=>t&&Number(t.amount)>0&&['income','expense'].includes(t.type)).map(cleanTransaction);
+  if(data&&Array.isArray(data.categories)){const names=[...new Set(data.categories.map(x=>String(x).trim()).filter(Boolean))];if(names.length)categories=names.filter(n=>n.toLocaleLowerCase('es')!=='sueldo')}
+  movementPage=0;categoryPage=0;persist();render();alert('Copia restaurada.');
+ }catch(err){alert('No se pudo restaurar: el archivo no parece una copia válida.')}finally{e.target.value=''}
+});
+$('clearBtn').addEventListener('click',()=>{if(confirm('¿Borrar TODOS los movimientos guardados en este dispositivo? Esta acción no se puede deshacer.')&&confirm('Confirmación final: ¿borrar todos los registros?')){txs=[];movementPage=0;persist();render()}});
+
+// Initial render.
+fillCategories();showWizardStep(1);$('date').value=dateISO();persist();render();
 })();
 </script>
 </body>
