@@ -69,6 +69,82 @@ body{padding:0;overflow:hidden}
 @media(max-height:500px){.category-groups-grid{gap:4px}.category-group-panel{padding:4px}.category-group-heading{font-size:9px;margin-bottom:2px}.category-group-items{gap:2px}.category-group-items .category-choice{height:31px;min-height:31px}.category-group-items .choice-icon{width:15px;height:15px;font-size:10px}.category-group-items .choice-name{font-size:8px}}
 @media(max-width:360px){.category-groups-grid{gap:4px}.category-group-panel{padding:4px}.category-group-items .category-choice{height:34px;min-height:34px}}
 
+
+/* Categorías: aprovechar la altura de pantalla y hacer los iconos claramente táctiles. */
+.category-groups-grid{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  grid-auto-rows:minmax(0,1fr);
+  align-content:stretch;
+  gap:8px;
+  padding:1px 1px 3px;
+}
+.category-group-panel{
+  display:flex;
+  flex-direction:column;
+  min-height:0;
+  padding:8px;
+  border-radius:14px;
+}
+.category-group-heading{
+  flex:0 0 auto;
+  gap:6px;
+  font-size:12px;
+  line-height:1.2;
+  margin:0 0 7px 2px;
+}
+.category-group-items{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  grid-auto-rows:minmax(0,1fr);
+  align-content:stretch;
+  gap:6px;
+  flex:1;
+  min-height:0;
+}
+.category-group-items .category-choice{
+  min-width:0;
+  min-height:54px;
+  height:auto;
+  padding:6px 4px;
+  border-radius:12px;
+  gap:5px;
+  font-size:12px;
+}
+.category-group-items .choice-icon{
+  width:32px;
+  height:32px;
+  border-radius:9px;
+  font-size:22px;
+}
+.category-group-items .choice-name{
+  font-size:12px;
+  line-height:1.1;
+  overflow-wrap:anywhere;
+}
+.category-group-items.single-category-item .category-choice{
+  grid-column:1 / -1;
+  flex-direction:row;
+  justify-content:center;
+  gap:12px;
+  padding:8px 12px;
+}
+.category-group-items.single-category-item .choice-icon{
+  width:38px;
+  height:38px;
+  font-size:25px;
+  border-radius:11px;
+}
+@media(max-height:500px){
+  .category-groups-grid{gap:5px}
+  .category-group-panel{padding:5px}
+  .category-group-heading{font-size:10px;margin-bottom:4px}
+  .category-group-items{gap:4px}
+  .category-group-items .category-choice{min-height:42px;padding:3px}
+  .category-group-items .choice-icon{width:25px;height:25px;font-size:18px}
+  .category-group-items .choice-name{font-size:10px}
+  .category-group-items.single-category-item .choice-icon{width:28px;height:28px;font-size:20px}
+}
+
 </style>
 </head>
 <body>
@@ -287,7 +363,7 @@ function fillCategories(preferred){
  $('categoryGroupsGrid').innerHTML=groups.map(g=>{
   const items=categoriesForGroup(g.name,categories);
   if(!items.length)return '';
-  return `<section class="category-group-panel" aria-label="${esc(g.name)}"><div class="category-group-heading"><span>${g.icon}</span><span>${esc(g.name)}</span></div><div class="category-group-items">${items.map(n=>`<button type="button" class="category-choice ${chosen===n?'selected':''}" data-category-choice="${esc(n)}" aria-pressed="${chosen===n?'true':'false'}"><span class="choice-icon">${ICONS[n]||'📦'}</span><span class="choice-name">${esc(n)}</span></button>`).join('')}</div></section>`;
+  return `<section class="category-group-panel" aria-label="${esc(g.name)}"><div class="category-group-heading"><span>${g.icon}</span><span>${esc(g.name)}</span></div><div class="category-group-items ${items.length===1?'single-category-item':''}">${items.map(n=>`<button type="button" class="category-choice ${chosen===n?'selected':''}" data-category-choice="${esc(n)}" aria-pressed="${chosen===n?'true':'false'}"><span class="choice-icon">${ICONS[n]||'📦'}</span><span class="choice-name">${esc(n)}</span></button>`).join('')}</div></section>`;
  }).join('');
 }
 function render(){
