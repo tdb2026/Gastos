@@ -145,6 +145,14 @@ body{padding:0;overflow:hidden}
   .category-group-items.single-category-item .choice-icon{width:28px;height:28px;font-size:20px}
 }
 
+
+/* Todas las categorías usan el mismo tamaño de icono y el mismo formato de botón, aunque el grupo tenga pocos elementos. */
+.category-group-items.single-category-item .category-choice{grid-column:auto;flex-direction:column;justify-content:center;gap:5px;padding:6px 4px}
+.category-group-items.single-category-item .choice-icon{width:32px;height:32px;font-size:22px;border-radius:9px}
+@media(max-height:500px){
+ .category-group-items.single-category-item .category-choice{grid-column:auto;flex-direction:column;gap:3px;padding:3px 2px}
+ .category-group-items .choice-icon,.category-group-items.single-category-item .choice-icon{width:25px;height:25px;font-size:18px;border-radius:8px}
+}
 </style>
 </head>
 <body>
@@ -221,12 +229,12 @@ body{padding:0;overflow:hidden}
 <script>
 (function(){
 'use strict';
-const STORAGE_KEY='mis-gastos-v1', CATEGORIES_KEY='mis-gastos-categories-v1', DEMO_INIT_KEY='mis-gastos-demo-initialized-v1', EXTRA_CATEGORIES_KEY='mis-gastos-grouped-categories-v2', CATEGORY_GROUPS_KEY='mis-gastos-category-groups-v1', DEMO_DATA_VERSION_KEY='mis-gastos-demo-data-version', DEMO_DATA_VERSION='2026-10-demo-jun-sep-v2-grouped';
-const DEFAULT_CATEGORIES=['Alquiler','Gas','Luz','Teatro','Expensas','Nafta','Celular','Internet','PedidosYa','Super','Varios'];
+const STORAGE_KEY='mis-gastos-v1', CATEGORIES_KEY='mis-gastos-categories-v1', DEMO_INIT_KEY='mis-gastos-demo-initialized-v1', EXTRA_CATEGORIES_KEY='mis-gastos-grouped-categories-v2', CATEGORY_GROUPS_KEY='mis-gastos-category-groups-v1', DEMO_DATA_VERSION_KEY='mis-gastos-demo-data-version', DEMO_DATA_VERSION='2026-10-demo-jun-sep-v3-birras-uber-ropa';
+const DEFAULT_CATEGORIES=['Alquiler','Gas','Luz','Teatro','Expensas','Nafta','Celular','Internet','PedidosYa','Super','Birras','Uber','Ropa','Varios'];
 const LEGACY_DEFAULT_CATEGORIES=['Alimentos','Vivienda','Servicios','Transporte','Salud','Compras','Ocio','Viajes','Educación','Mascotas','Impuestos','Otros'];
-const ICONS={'Alquiler':'🏠','Gas':'🔥','Luz':'💡','Teatro':'🎭','Expensas':'🏢','Nafta':'⛽','Celular':'📱','Internet':'🌐','PedidosYa':'🛵','Comida':'🍽️','Super':'🛒','Varios':'📦','Sueldo':'💼'};
-const EXPENSE_GROUPS=[{name:'Casa',icon:'🏠',categories:['Alquiler','Expensas']},{name:'Impuestos',icon:'🧾',categories:['Gas','Luz','Celular','Internet']},{name:'Ocio',icon:'🎭',categories:['Teatro']},{name:'Comida',icon:'🍽️',categories:['PedidosYa','Super']},{name:'Transporte',icon:'🚗',categories:['Nafta']},{name:'Varios',icon:'📦',categories:['Varios']}];
-const DEFAULT_CATEGORY_GROUPS={'Alquiler':'Casa','Expensas':'Casa','Gas':'Impuestos','Luz':'Impuestos','Celular':'Impuestos','Internet':'Impuestos','Teatro':'Ocio','PedidosYa':'Comida','Super':'Comida','Nafta':'Transporte','Varios':'Varios'};
+const ICONS={'Alquiler':'🏠','Gas':'🔥','Luz':'💡','Teatro':'🎭','Birras':'🍻','Expensas':'🏢','Nafta':'⛽','Uber':'🚕','Celular':'📱','Internet':'🌐','PedidosYa':'🛵','Comida':'🍽️','Super':'🛒','Ropa':'👕','Varios':'📦','Sueldo':'💼'};
+const EXPENSE_GROUPS=[{name:'Casa',icon:'🏠',categories:['Alquiler','Expensas']},{name:'Impuestos',icon:'🧾',categories:['Gas','Luz','Celular','Internet']},{name:'Ocio',icon:'🎭',categories:['Teatro','Birras']},{name:'Comida',icon:'🍽️',categories:['PedidosYa','Super']},{name:'Transporte',icon:'🚗',categories:['Nafta','Uber']},{name:'Varios',icon:'📦',categories:['Varios','Ropa']}];
+const DEFAULT_CATEGORY_GROUPS={'Alquiler':'Casa','Expensas':'Casa','Gas':'Impuestos','Luz':'Impuestos','Celular':'Impuestos','Internet':'Impuestos','Teatro':'Ocio','Birras':'Ocio','PedidosYa':'Comida','Super':'Comida','Nafta':'Transporte','Uber':'Transporte','Varios':'Varios','Ropa':'Varios'};
 function loadCategoryGroupOverrides(){try{const value=JSON.parse(localStorage.getItem(CATEGORY_GROUPS_KEY)||'{}');if(value&&typeof value==='object'&&!Array.isArray(value))return value}catch(e){}return {}}
 function categoryGroupFor(name){const valid=EXPENSE_GROUPS.some(g=>g.name===categoryGroupOverrides?.[name]);return valid?categoryGroupOverrides[name]:(DEFAULT_CATEGORY_GROUPS[name]||'Varios')}
 function categoriesForGroup(group,list=categories){return list.filter(name=>categoryGroupFor(name)===group).sort((a,b)=>{const fixed=(EXPENSE_GROUPS.find(g=>g.name===group)?.categories)||[];const ai=fixed.indexOf(a),bi=fixed.indexOf(b);if(ai!==-1||bi!==-1)return (ai===-1?999:ai)-(bi===-1?999:bi);return a.localeCompare(b,'es')})}
@@ -239,10 +247,10 @@ function createMockTransactions(){
  // Datos ficticios para junio, julio, agosto y septiembre de 2026.
  // Los importes que indicó la usuaria se mantienen exactos en los cuatro meses.
  const monthly=[
-  {month:'2026-06',label:'junio',phone:25000,theater:30000,fuel:88000,internet:25000,delivery:10000,food:32000,super:100000},
-  {month:'2026-07',label:'julio',phone:25000,theater:32000,fuel:92000,internet:25500,delivery:12500,food:35000,super:105000},
-  {month:'2026-08',label:'agosto',phone:30000,theater:18000,fuel:108000,internet:26000,delivery:18500,food:42000,super:112000},
-  {month:'2026-09',label:'septiembre',phone:30000,theater:46500,fuel:119000,internet:27500,delivery:22000,food:48000,super:125000}
+  {month:'2026-06',label:'junio',phone:25000,theater:30000,beers:8000,fuel:88000,uber:6500,clothes:24000,internet:25000,delivery:10000,food:32000,super:100000},
+  {month:'2026-07',label:'julio',phone:25000,theater:32000,beers:9500,fuel:92000,uber:8000,clothes:12000,internet:25500,delivery:12500,food:35000,super:105000},
+  {month:'2026-08',label:'agosto',phone:30000,theater:18000,beers:6000,fuel:108000,uber:12500,clothes:38000,internet:26000,delivery:18500,food:42000,super:112000},
+  {month:'2026-09',label:'septiembre',phone:30000,theater:46500,beers:14000,fuel:119000,uber:16000,clothes:28500,internet:27500,delivery:22000,food:48000,super:125000}
  ];
  const rows=[];
  monthly.forEach((m)=>{
@@ -255,7 +263,10 @@ function createMockTransactions(){
   add('03','expense',12000,'Gas','Factura de gas');
   add('18','expense',m.phone,'Celular','Plan de celular');
   add('12','expense',m.theater,'Teatro','Entradas de teatro');
+  add('22','expense',m.beers,'Birras','Salida con amigos');
   add('16','expense',m.fuel,'Nafta','Carga de combustible');
+  add('17','expense',m.uber,'Uber','Viaje en Uber');
+  add('24','expense',m.clothes,'Ropa','Compra de ropa');
   add('20','expense',m.internet,'Internet','Servicio de internet');
   add('09','expense',m.delivery,'PedidosYa','Pedido a domicilio');
   add('13','expense',m.food,'Varios','Comidas fuera de casa');
@@ -273,6 +284,13 @@ if(localStorage.getItem(EXTRA_CATEGORIES_KEY)!=='done'){
  categories.sort((a,b)=>a.localeCompare(b,'es'));
  localStorage.setItem(EXTRA_CATEGORIES_KEY,'done');
 }
+// Añade las nuevas categorías una sola vez, también en instalaciones que ya tenían la app abierta antes.
+const NEW_CATEGORY_BUTTONS_KEY='mis-gastos-category-buttons-birras-uber-ropa-v1';
+if(localStorage.getItem(NEW_CATEGORY_BUTTONS_KEY)!=='done'){
+ for(const name of ['Birras','Uber','Ropa']) if(!categories.some(c=>c.toLocaleLowerCase('es')===name.toLocaleLowerCase('es'))) categories.push(name);
+ localStorage.setItem(NEW_CATEGORY_BUTTONS_KEY,'done');
+}
+
 // Actualiza únicamente la demo antigua; conserva todos los movimientos personales.
 const demoDataVersion=localStorage.getItem(DEMO_DATA_VERSION_KEY);
 if(demoDataVersion!==DEMO_DATA_VERSION){
