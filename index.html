@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#f7f7f4">
-<title>Mis gastos</title>
+<title>Gastos</title>
 <style>
 :root{--bg:#f7f7f4;--card:#fff;--ink:#20221f;--muted:#777b73;--line:#e7e8e1;--green:#286a50;--green-soft:#e6f1e9;--red:#a8453c;--red-soft:#faeae7;--radius:20px}
 *{box-sizing:border-box}html{background:var(--bg)}body{margin:0;font:16px/1.4 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink);background:var(--bg);padding:env(safe-area-inset-top) 0 calc(88px + env(safe-area-inset-bottom))}
 button,input,select{font:inherit}button{cursor:pointer}[hidden]{display:none!important}.app{max-width:600px;margin:0 auto;padding:22px 17px 30px}
-header{display:flex;justify-content:space-between;align-items:center;margin:4px 0 20px}.eyebrow{font-size:12px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);font-weight:700}.brand{font-size:24px;font-weight:750;letter-spacing:-.04em}.icon-btn{border:1px solid var(--line);background:var(--card);border-radius:13px;width:44px;height:44px;color:var(--ink);font-size:20px}
+.eyebrow{font-size:12px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);font-weight:700}
 .month-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}.month-nav button{border:0;background:transparent;padding:8px 12px;font-size:22px;color:var(--muted)}.month-label{font-weight:700;text-transform:capitalize}
 .balance{background:#222923;color:white;border-radius:24px;padding:23px 22px 20px;margin-bottom:14px}.balance .eyebrow{color:#c3cec4}.total{font-size:clamp(27px,8vw,36px);font-weight:750;letter-spacing:-.04em;margin:7px 0 18px;overflow-wrap:anywhere}.total-label{display:block;font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;color:#c3cec4;margin-bottom:2px}.trend-matrix-wrap{overflow-x:auto;margin-top:10px;border:1px solid var(--line);border-radius:13px;background:white}.trend-matrix{border-collapse:separate;border-spacing:0;width:100%;min-width:735px;font-size:12px;font-variant-numeric:tabular-nums}.trend-matrix th,.trend-matrix td{padding:11px 9px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}.trend-matrix thead th{background:#f1f3ed;color:var(--muted);font-size:11px;text-transform:capitalize;font-weight:750;position:sticky;top:0}.trend-matrix th:first-child,.trend-matrix td:first-child{text-align:left;position:sticky;left:0;background:white;z-index:1}.trend-matrix thead th:first-child{background:#f1f3ed;z-index:2}.trend-matrix tbody tr:last-child td{border-bottom:0}.matrix-category{display:flex;align-items:center;gap:7px;min-width:112px;font-weight:700}.matrix-category .emoji{width:30px;height:30px;border-radius:9px;font-size:15px}.matrix-amount{font-weight:750;color:var(--ink)}.matrix-delta{font-size:10px;margin-top:3px;color:var(--muted)}.matrix-delta.up{color:var(--red)}.matrix-delta.down{color:var(--green)}.matrix-note{font-size:11px;color:var(--muted);line-height:1.5;margin:9px 2px 0}.all-trends-card{padding:0;overflow:hidden}.all-trends-heading{padding:14px 14px 0;font-size:13px;font-weight:750}.trend-matrix-wrap:focus{outline:2px solid #77a987;outline-offset:2px}.stats{display:grid;grid-template-columns:1fr 1fr;gap:12px}.stat{border-radius:15px;padding:13px;background:#343d36;min-width:0}.stat .label{font-size:12px;color:#c8d1c8}.stat .amount{font-size:clamp(14px,4vw,18px);font-weight:700;margin-top:5px;overflow-wrap:anywhere}.income{color:#a8e0b8}.expense{color:#f2aaa1}
 .tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;padding:5px;background:#eaece5;border-radius:14px;margin:20px 0 15px}.tab{border:0;background:transparent;padding:10px 4px;border-radius:10px;color:var(--muted);font-weight:650;font-size:14px}.tab.active{background:white;color:var(--ink);box-shadow:0 1px 3px #0000000c}
@@ -27,11 +27,35 @@ header{display:flex;justify-content:space-between;align-items:center;margin:4px 
 /* Simple, low-clutter category chart */
 .simple-trend-card{padding:15px 14px 13px}.simple-trend-card .field{margin:0 0 17px}.simple-trend-card .field select{font-size:16px;padding:13px}.simple-chart-caption{font-size:12px;color:var(--muted);margin-bottom:2px}.chart.simple-chart{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;height:230px;padding:14px 2px 0;margin-top:6px;border-bottom:1px solid var(--line);align-items:stretch}.simple-chart .bar-col{justify-content:flex-end;gap:5px}.simple-chart .bar-value{height:auto;transform:none;font-size:13px;font-weight:750;color:var(--ink);white-space:normal;line-height:1.2;min-height:16px}.simple-chart .bar-track{height:130px;width:100%;max-width:52px;margin:0 auto;align-items:end}.simple-chart .bar{max-width:52px;background:#a6c8af;border-radius:8px 8px 2px 2px}.simple-chart .bar.current{background:var(--green)}.simple-chart .bar-label{font-size:13px;font-weight:700;color:var(--ink);text-transform:capitalize}.simple-chart .bar-change{font-size:11px;line-height:1.25;min-height:28px;text-align:center;color:var(--muted)}.simple-chart .bar-change.up{color:var(--red)}.simple-chart .bar-change.down{color:var(--green)}.simple-chart .bar-change strong{display:block;font-weight:750}.simple-chart-note{font-size:12px;line-height:1.45;color:var(--muted);margin:13px 2px 0}.simple-chart-empty{grid-column:1/-1;align-self:center;text-align:center;color:var(--muted);font-size:13px;padding:20px 10px}
 @media(min-width:600px){.overlay{align-items:center}.sheet{border-radius:26px;max-height:90vh}.bottom-bar{border-left:0;border-right:0}}@media(max-width:380px){.app{padding-left:12px;padding-right:12px}.chart{gap:2px}.bar-value{font-size:8px}.trend-row{grid-template-columns:45px minmax(0,1fr) auto;gap:7px}.trend-month{font-size:12px}.cat-total{font-size:12px}}
+
+/* Fixed-screen layout: navigate by buttons instead of vertical scrolling */
+html,body{height:100%;height:100dvh;overflow:hidden;overscroll-behavior:none}
+body{padding:0;overflow:hidden}
+.app{height:100dvh;max-height:100dvh;overflow:hidden;padding:calc(7px + env(safe-area-inset-top)) 13px calc(77px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:0}
+.eyebrow{font-size:10px}
+.month-nav{flex:0 0 28px;margin:0 0 5px}.month-nav button{padding:0 10px;font-size:24px}.month-label{font-size:14px}
+.balance{flex:0 0 auto;border-radius:18px;padding:12px 15px 13px;margin:0 0 9px}.balance .eyebrow{font-size:10px}.total{font-size:clamp(24px,7vw,32px);margin:2px 0 9px}.total-label{font-size:9px}.stats{gap:8px}.stat{padding:8px 10px;border-radius:12px}.stat .label{font-size:11px}.stat .amount{font-size:clamp(13px,3.6vw,16px);margin-top:2px}
+.tabs{flex:0 0 39px;margin:0 0 8px;padding:4px;gap:4px}.tab{padding:6px 3px;font-size:13px}
+.page{display:none;min-height:0;flex:1;overflow:hidden}.page.active{display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.section-head{flex:0 0 auto;margin:2px 1px 7px}.section-head h2{font-size:16px}.small{font-size:11px}
+.filter-row{flex:0 0 36px;margin:0 0 7px;gap:6px}.filter-row select{padding:7px 9px;font-size:12px}
+.demo-notice{flex:0 0 auto;margin:0 0 6px;padding:7px 9px;font-size:10px;min-height:0}.demo-notice strong{font-size:11px;margin-bottom:0}.demo-notice button{padding:6px 7px;font-size:10px}
+.list{flex:1;min-height:0;overflow:hidden;gap:5px}.transaction{flex:0 0 auto;padding:7px 9px;gap:8px;border-radius:12px;min-height:54px}.emoji{width:34px;height:34px;border-radius:10px;font-size:17px}.tx-title{font-size:13px}.tx-meta{font-size:10px;margin-top:1px}.tx-amount{font-size:12px}.tx-actions{margin-top:1px}.tx-actions button{font-size:10px;padding:0 3px}.empty{padding:19px 12px;font-size:13px}
+.movement-pager{flex:0 0 36px;display:flex;align-items:center;justify-content:space-between;gap:6px;margin-top:5px;font-size:11px;color:var(--muted)}.movement-pager button{border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);font-size:11px;font-weight:700;padding:7px 10px}.movement-pager button:disabled{opacity:.35;cursor:default}.movement-pager span{font-variant-numeric:tabular-nums}
+.bottom-bar{padding:8px 13px calc(8px + env(safe-area-inset-bottom))}.bottom-inner{gap:8px}.bottom-inner .primary{padding:12px 10px;border-radius:13px;font-size:14px}.secondary{border-radius:13px;padding:0 13px;font-size:13px}
+.footer-note{display:none}
+/* Each workflow becomes its own screen */
+.trend-screen{flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden}.trend-screen[hidden]{display:none!important}.screen-prompt{font-size:13px;color:var(--muted);margin:0 0 8px}.trend-category-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin:0}.trend-category-grid .category-choice{min-height:54px;padding:7px 6px;gap:5px;flex-direction:column;justify-content:center;text-align:center;font-size:11px;border-radius:12px}.trend-category-grid .choice-icon{width:26px;height:26px;font-size:15px;border-radius:8px}.trend-category-grid .choice-name{white-space:normal;overflow-wrap:anywhere}
+#trendChartPane{gap:5px}.screen-back{align-self:flex-start;border:1px solid var(--line);background:#fff;color:var(--green);border-radius:11px;font-size:12px;font-weight:750;padding:8px 11px;flex:0 0 auto}.selected-category-title{font-size:20px;font-weight:750;margin-top:1px}.simple-chart-caption{font-size:11px;margin:0}.chart.simple-chart{height:clamp(170px,27dvh,225px);flex:0 0 auto;padding-top:8px;margin-top:0;gap:12px}.simple-chart .bar-value{font-size:12px}.simple-chart .bar-track{height:clamp(85px,15dvh,125px);max-width:54px}.simple-chart .bar-label{font-size:12px}.simple-chart .bar-change{font-size:10px;min-height:24px}.simple-chart-note{font-size:11px;margin:5px 1px 0}
+.settings-view{display:none;flex:1;min-height:0;overflow:hidden;flex-direction:column}.settings-view.active{display:flex}.settings-view[hidden]{display:none!important}.settings-action{display:flex;align-items:center;gap:11px;padding:13px 12px;border:1px solid var(--line);border-radius:15px;background:#fff;text-align:left;margin-bottom:9px;flex:0 0 auto;color:var(--ink)}.settings-action span:nth-child(2){flex:1;display:flex;flex-direction:column;gap:3px}.settings-action strong{font-size:14px}.settings-action small,.data-note small{font-size:11px;color:var(--muted);line-height:1.35}.settings-action b{font-size:22px;color:var(--muted);font-weight:500}.settings-icon{width:35px;height:35px;display:grid;place-items:center;background:#edf2eb;border-radius:11px;font-size:18px;flex-shrink:0}.settings-hint{margin-top:auto;font-size:11px;color:var(--muted);padding:10px 2px}.settings-subhead{display:flex;align-items:center;gap:10px;min-height:42px;margin-bottom:7px;flex:0 0 auto}.settings-subhead strong{font-size:15px;flex:1}.settings-subhead .screen-back{padding:7px 9px}.settings-subhead .small{white-space:nowrap}.compact-tools{flex:0 0 auto;margin-bottom:8px}.category-tools input{font-size:13px;padding:10px}.category-tools button{padding:10px 12px;font-size:12px}.managed-list{flex:1;min-height:0;overflow:hidden}.managed-category{min-height:42px;padding:4px 0;gap:7px}.managed-category .emoji{width:30px!important;height:30px!important;font-size:15px!important}.managed-category .name{font-size:12px}.mini-btn{padding:6px 7px;font-size:10px}.category-pager{margin-top:3px}.data-note{display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--line);border-radius:14px;background:#fff;margin-bottom:10px;flex:0 0 auto}.data-note div{display:flex;flex-direction:column;gap:3px}.data-note strong{font-size:13px}.restore-choice{display:flex;flex-direction:column;gap:9px;padding:13px;border:1px solid var(--line);background:#fff;border-radius:14px;font-size:12px;font-weight:700;margin-bottom:10px}.restore-choice input{font-size:11px;max-width:100%}.danger-action{border:1px solid #efc9c4;background:#fff7f6;color:var(--red);border-radius:13px;padding:12px;text-align:center;font-size:12px;font-weight:750;margin-top:auto;flex:0 0 auto}
+/* Full-screen, three-step entry. No form scrolling. */
+.overlay{padding:0;align-items:stretch;overflow:hidden}.overlay.open{display:flex}.sheet{height:100dvh;max-height:100dvh;width:100%;max-width:600px;border-radius:0;padding:calc(12px + env(safe-area-inset-top)) 16px calc(12px + env(safe-area-inset-bottom));overflow:hidden;display:flex;flex-direction:column;gap:0}.sheet-head{flex:0 0 auto;margin-bottom:12px}.sheet-head h2{font-size:20px}.close{flex:0 0 36px}.wizard-step{display:none;flex:1;min-height:0;overflow:hidden;flex-direction:column}.wizard-step.active{display:flex}.wizard-step[hidden]{display:none!important}.type-toggle{flex:0 0 auto;margin-bottom:18px}.type-btn{padding:13px}.amount-field{margin:0}.amount-wrap input{font-size:28px;padding-top:16px;padding-bottom:16px}.wizard-actions{margin-top:auto;display:flex;gap:8px;padding-top:12px;flex:0 0 auto}.wizard-actions .primary,.wizard-actions .secondary{flex:1;padding:13px 10px}.step-question{font-size:17px;font-weight:750;margin:3px 0 12px}.form-categories{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;align-content:start}.form-categories .category-choice{min-height:61px;flex-direction:column;justify-content:center;text-align:center;gap:5px;padding:7px 4px;font-size:11px;border-radius:12px}.form-categories .choice-icon{width:26px;height:26px;font-size:15px;border-radius:8px}.form-categories .choice-name{overflow-wrap:anywhere}.review-summary{padding:15px;border-radius:15px;background:#e9f2eb;color:var(--green);font-size:19px;font-weight:750;margin-bottom:4px}.wizard-step .field{margin:9px 0}.wizard-step .field input{padding:12px}.wizard-step .field span{font-size:11px;margin-bottom:5px}
+@media(max-height:700px){.balance{padding:9px 13px}.total{font-size:24px;margin:1px 0 6px}.stat{padding:6px 8px}.tabs{margin-bottom:5px}.chart.simple-chart{height:165px}.simple-chart .bar-track{height:82px}.form-categories .category-choice{min-height:53px}.wizard-step .field{margin:6px 0}}
+@media(max-width:360px){.app{padding-left:10px;padding-right:10px}.transaction{padding:6px 7px}.tx-meta{font-size:9px}.form-categories .category-choice{min-height:51px}.trend-category-grid .category-choice{min-height:50px}}
 </style>
 </head>
 <body>
 <div class="app">
-<header><div><div class="eyebrow">Finanzas personales</div><div class="brand">Mis gastos</div></div><button class="icon-btn" id="exportBtn" title="Exportar CSV" aria-label="Exportar CSV">↧</button></header>
 <div class="month-nav"><button id="prevMonth" aria-label="Mes anterior">‹</button><div class="month-label" id="monthLabel"></div><button id="nextMonth" aria-label="Mes siguiente">›</button></div>
 <section class="balance"><div class="eyebrow">Balance del mes</div><div class="total"><span class="total-label">Queda después de los gastos</span><span id="balanceTotal">$ 0</span></div><div class="stats"><div class="stat"><div class="label">↗ Entró</div><div class="amount income" id="incomeTotal">$ 0</div></div><div class="stat"><div class="label">↘ Salió</div><div class="amount expense" id="expenseTotal">$ 0</div></div></div></section>
 <div class="tabs" role="tablist"><button class="tab active" data-page="home">Movimientos</button><button class="tab" data-page="stats">Evolución</button><button class="tab" data-page="settings">Ajustes</button></div>
@@ -39,38 +63,66 @@ header{display:flex;justify-content:space-between;align-items:center;margin:4px 
 <div class="section-head"><h2>Movimientos</h2><span class="small" id="txCount">0 registros</span></div>
 <div class="filter-row"><select id="typeFilter" aria-label="Filtrar tipo"><option value="all">Todos</option><option value="expense">Gastos</option><option value="income">Ingresos</option></select><select id="categoryFilter" aria-label="Filtrar categoría"><option value="all">Todas las categorías</option></select></div>
 <div class="demo-notice" id="demoNotice" hidden><div><strong>Datos de prueba</strong>Importes ficticios de julio, agosto y septiembre de 2026.</div><button id="removeDemoBtn" type="button">Quitar demo</button></div>
-<div class="list" id="transactions"></div>
+<div class="list" id="transactions"></div><div class="movement-pager" id="movementPager"><button type="button" id="movementPrev">‹ Anteriores</button><span id="movementPageLabel">1 / 1</span><button type="button" id="movementNext">Siguientes ›</button></div>
 </section>
 <section class="page" id="statsPage">
 <div class="section-head"><h2>Evolución de gastos</h2></div>
-<div class="card simple-trend-card">
-  <div class="field"><span>ELEGÍ UNA CATEGORÍA</span><div class="category-choice-grid trend-category-grid" id="trendCategoryButtons" aria-label="Elegí una categoría para ver su evolución"></div></div>
-  <div class="simple-chart-caption">Importe por mes · últimos 3 meses</div>
+<div class="trend-screen active" id="trendPickerPane">
+  <div class="screen-prompt">¿Qué gasto querés revisar?</div>
+  <div class="category-choice-grid trend-category-grid" id="trendCategoryButtons" aria-label="Elegí una categoría para ver su evolución"></div>
+</div>
+<div class="trend-screen" id="trendChartPane" hidden>
+  <button type="button" class="screen-back" id="changeTrendCategory">‹ Cambiar categoría</button>
+  <div class="selected-category-title" id="selectedTrendTitle"></div>
+  <div class="simple-chart-caption">Importe por mes</div>
   <div class="chart simple-chart" id="trendChart" aria-label="Gráfico de gastos de los últimos tres meses"></div>
-  <p class="simple-chart-note">Las barras muestran cuánto gastaste. Debajo de cada mes aparece la diferencia respecto del mes anterior.</p>
+  <div class="simple-chart-note">Debajo de cada mes ves la diferencia frente al anterior.</div>
 </div>
 </section>
 <section class="page" id="settingsPage">
-<div class="section-head"><h2>Categorías de gastos</h2><span class="small" id="categoryCount"></span></div>
-<div class="card"><div class="field-label">AGREGAR CATEGORÍA</div><div class="category-tools"><input id="newCategory" maxlength="32" placeholder="Ej. Salidas" aria-label="Nombre de categoría nueva"><button id="addCategoryBtn">Agregar</button></div><div class="small" style="margin-top:8px">Podés renombrar o eliminar categorías cuando lo necesites.</div></div>
-<div class="card" id="managedCategories"></div>
-<div class="section-head"><h2>Tus datos</h2></div><div class="transaction"><div class="emoji">🔒</div><div class="tx-info"><div class="tx-title">Guardado en este dispositivo</div><div class="tx-meta">Los movimientos quedan en este navegador. No se suben a internet.</div></div></div>
-<div style="margin-top:12px"><button class="primary" id="backupBtn">Exportar copia de seguridad (JSON)</button></div>
-<label class="field"><span>RESTAURAR COPIA DE SEGURIDAD</span><input id="restoreFile" type="file" accept=".json,application/json"></label>
-<div style="margin-top:18px"><button class="link-btn" id="clearBtn" style="color:var(--red)">Borrar todos los movimientos…</button></div><p class="footer-note">Consejo: guardá una copia de seguridad periódicamente. Si borrás los datos del navegador, podés perder tus registros.</p>
+  <div class="settings-view active" id="settingsMenu">
+    <div class="section-head"><h2>Ajustes</h2></div>
+    <button type="button" class="settings-action" id="categoriesScreenBtn"><span class="settings-icon">▦</span><span><strong>Mis categorías</strong><small>Agregar, renombrar o eliminar</small></span><b>›</b></button>
+    <button type="button" class="settings-action" id="dataScreenBtn"><span class="settings-icon">↕</span><span><strong>Copias de seguridad</strong><small>Exportar o recuperar tus datos</small></span><b>›</b></button>
+    <div class="settings-hint">Los datos se guardan en este dispositivo.</div>
+  </div>
+  <div class="settings-view" id="categoriesSettings" hidden>
+    <div class="settings-subhead"><button type="button" class="screen-back" data-settings-back>‹ Ajustes</button><strong>Mis categorías</strong><span class="small" id="categoryCount"></span></div>
+    <div class="category-tools compact-tools"><input id="newCategory" maxlength="32" placeholder="Nueva categoría" aria-label="Nombre de categoría nueva"><button id="addCategoryBtn">Agregar</button></div>
+    <div class="managed-list" id="managedCategories"></div>
+    <div class="movement-pager category-pager"><button type="button" id="categoryPrev">‹ Anteriores</button><span id="categoryPageLabel">1 / 1</span><button type="button" id="categoryNext">Siguientes ›</button></div>
+  </div>
+  <div class="settings-view" id="dataSettings" hidden>
+    <div class="settings-subhead"><button type="button" class="screen-back" data-settings-back>‹ Ajustes</button><strong>Copias de seguridad</strong></div>
+    <div class="data-note"><span class="settings-icon">🔒</span><div><strong>Guardado en este dispositivo</strong><small>Los movimientos no se suben a internet. Guardá una copia para no perderlos.</small></div></div>
+    <button type="button" class="settings-action" id="backupBtn"><span class="settings-icon">⇩</span><span><strong>Exportar copia</strong><small>Guardar todos los datos en un archivo</small></span><b>›</b></button>
+    <button type="button" class="settings-action" id="exportCSVBtn"><span class="settings-icon">⇩</span><span><strong>Exportar movimientos (CSV)</strong><small>Abrir los datos en una planilla</small></span><b>›</b></button>
+    <label class="restore-choice"><span>Importar una copia guardada</span><input id="restoreFile" type="file" accept=".json,application/json"></label>
+    <button type="button" class="danger-action" id="clearBtn">Borrar todos los movimientos</button>
+  </div>
 </section>
 <div class="footer-note">Tus gastos, a tu manera.</div>
 </div>
 <div class="bottom-bar"><div class="bottom-inner"><button class="secondary" id="todayBtn">Hoy</button><button class="primary" id="addBtn">＋ Registrar movimiento</button></div></div>
 <div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="formTitle"><form class="sheet" id="txForm">
-<div class="sheet-head"><h2 id="formTitle">Nuevo movimiento</h2><button type="button" class="close" id="closeForm" aria-label="Cerrar">×</button></div>
-<div class="type-toggle"><button type="button" class="type-btn selected" data-type="expense">− Gasto</button><button type="button" class="type-btn" data-type="income">＋ Ingreso</button></div>
-<label class="field"><span>IMPORTE (ARS) *</span><div class="amount-wrap"><b>$</b><input id="amount" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="0" required></div></label>
-<div class="field" id="expenseCategoryField"><span>ELEGÍ UNA CATEGORÍA</span><div class="category-choice-grid" id="categoryButtons" aria-label="Categorías de gastos"></div><input id="category" type="hidden" value=""></div>
-<div class="field" id="incomeCategoryField" hidden><span>CATEGORÍA</span><div class="fixed-category">💼 Sueldo</div></div>
-<label class="field"><span>DESCRIPCIÓN (OPCIONAL)</span><input id="description" maxlength="100" placeholder="Ej. supermercado, alquiler…"></label>
-<label class="field"><span>FECHA</span><input id="date" type="date" required></label>
-<button class="primary" type="submit" id="saveBtn">Guardar movimiento</button><button class="link-btn" type="button" id="cancelForm" style="width:100%">Cancelar</button>
+<div class="sheet-head"><div><div class="eyebrow" id="stepLabel">PASO 1 DE 3</div><h2 id="formTitle">Nuevo movimiento</h2></div><button type="button" class="close" id="closeForm" aria-label="Cerrar">×</button></div>
+<div class="wizard-step active" id="formStep1">
+  <div class="type-toggle"><button type="button" class="type-btn selected" data-type="expense">− Gasto</button><button type="button" class="type-btn" data-type="income">＋ Sueldo</button></div>
+  <label class="field amount-field"><span>¿CUÁNTO?</span><div class="amount-wrap"><b>$</b><input id="amount" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="0" required></div></label>
+  <div class="wizard-actions"><button type="button" class="primary" id="amountNext">Siguiente ›</button></div>
+</div>
+<div class="wizard-step" id="formStep2" hidden>
+  <div class="step-question">¿En qué categoría?</div>
+  <div class="category-choice-grid form-categories" id="categoryButtons" aria-label="Categorías de gastos"></div><input id="category" type="hidden" value="">
+  <div class="wizard-actions"><button type="button" class="secondary" id="categoryBack">‹ Atrás</button><button type="button" class="primary" id="categoryNext">Siguiente ›</button></div>
+</div>
+<div class="wizard-step" id="formStep3" hidden>
+  <div class="step-question" id="reviewTitle">Revisá los datos</div>
+  <div class="review-summary" id="reviewSummary"></div>
+  <label class="field"><span>FECHA</span><input id="date" type="date" required></label>
+  <label class="field"><span>DESCRIPCIÓN (OPCIONAL)</span><input id="description" maxlength="100" placeholder="Ej. salida con amigas"></label>
+  <div class="wizard-actions"><button type="button" class="secondary" id="detailsBack">‹ Atrás</button><button class="primary" type="submit" id="saveBtn">Guardar</button></div>
+</div>
 </form></div>
 <script>
 (function(){
@@ -238,7 +290,7 @@ $('categoryButtons').addEventListener('click',e=>{const b=e.target.closest('[dat
 $('trendCategoryButtons').addEventListener('click',e=>{const b=e.target.closest('[data-trend-category]');if(!b)return;selectedTrendCategory=b.dataset.trendCategory;renderAnalytics()});
 $('transactions').addEventListener('click',e=>{const edit=e.target.closest('[data-edit]'),del=e.target.closest('[data-delete]');if(edit){const t=txs.find(x=>x.id===edit.dataset.edit);if(t)openForm(t.type,t)}if(del){const t=txs.find(x=>x.id===del.dataset.delete);if(t&&confirm(`¿Borrar “${t.description||t.category}” por ${money(t.amount)}?`)){txs=txs.filter(x=>x.id!==t.id);persist();render()}}});
 document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.page').forEach(x=>x.classList.toggle('active',x.id===b.dataset.page+'Page'))}));
-$('exportBtn').addEventListener('click',exportCSV);$('backupBtn').addEventListener('click',backup);$('removeDemoBtn').addEventListener('click',()=>{const count=txs.filter(t=>t.demo).length;if(count&&confirm('¿Eliminar los '+count+' movimientos de prueba? Tus movimientos personales se conservarán.')){txs=txs.filter(t=>!t.demo);if(txs.length===0)viewDate=new Date();persist();render()}});$('addCategoryBtn').addEventListener('click',addCategory);$('newCategory').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();addCategory()}});
+$('exportCSVBtn').addEventListener('click',exportCSV);$('backupBtn').addEventListener('click',backup);$('removeDemoBtn').addEventListener('click',()=>{const count=txs.filter(t=>t.demo).length;if(count&&confirm('¿Eliminar los '+count+' movimientos de prueba? Tus movimientos personales se conservarán.')){txs=txs.filter(t=>!t.demo);if(txs.length===0)viewDate=new Date();persist();render()}});$('addCategoryBtn').addEventListener('click',addCategory);$('newCategory').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();addCategory()}});
 $('managedCategories').addEventListener('click',e=>{const rename=e.target.closest('[data-rename]'),remove=e.target.closest('[data-remove]');if(rename)renameCategory(rename.dataset.rename);if(remove)removeCategory(remove.dataset.remove)});
 $('restoreFile').addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;try{const data=JSON.parse(await f.text()),arr=Array.isArray(data)?data:data.transactions;if(!Array.isArray(arr))throw new Error('Formato inválido');if(!confirm(`Se reemplazarán los ${txs.length} movimientos actuales por ${arr.length} registros. ¿Continuar?`))return;txs=arr.filter(t=>t&&Number(t.amount)>0&&['income','expense'].includes(t.type)).map(cleanTransaction);if(data&&Array.isArray(data.categories)){const names=[...new Set(data.categories.map(x=>String(x).trim()).filter(Boolean))];if(names.length)categories=names.filter(n=>n.toLocaleLowerCase('es')!=='sueldo')}persist();render();alert('Copia restaurada.')}catch(err){alert('No se pudo restaurar: el archivo no parece una copia válida.')}finally{e.target.value=''}});
 $('clearBtn').addEventListener('click',()=>{if(confirm('¿Borrar TODOS los movimientos guardados en este dispositivo? Esta acción no se puede deshacer.')&&confirm('Confirmación final: ¿borrar todos los registros?')){txs=[];persist();render()}});
